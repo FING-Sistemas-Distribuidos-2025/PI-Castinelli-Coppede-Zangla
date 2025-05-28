@@ -1,16 +1,10 @@
+### Acciones disponibles
+
 ```js
-actions = [
-    "create",
-    "join",
-    "hit",
-    "stand",
-    "leave",
-    "start",
-    "reset",
-    "dealerPlay",
-];
+["create", "join", "hit", "stand", "leave", "start", "reset", "dealerPlay"];
 ```
 
+### Ejemplo de acción 1
 ```js
 {
     id: uuid,
@@ -19,10 +13,11 @@ actions = [
 }
 ```
 
+### Ejemplo de acción 2
 ```js
 {
     id: uuid,
-    action: action,
+    action: "join",
     playerId: uuid,
     gameId: uuid
 }
