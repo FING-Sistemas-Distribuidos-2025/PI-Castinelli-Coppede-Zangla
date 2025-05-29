@@ -20,14 +20,14 @@ const processQueue = async () => {
         try {
             // brpop returns [queueName, taskString]
             const result = await redis.brpop("queue:tasks", 0);
-            const taskData = JSON.parse(result[1]);
+            const task = JSON.parse(result[1]);
 
-            if (!taskData || !taskData.id) {
-                console.error("Invalid task data:", taskData);
+            if (!task || !task.id) {
+                console.error("Invalid task data:", task);
                 continue;
             }
 
-            processTask(taskData);
+            processTask(task);
         } catch (err) {
             console.error("Worker error:", err);
         }
@@ -269,6 +269,7 @@ const loadGame = async (gameId) => {
 const createGame = async (playerId) => {
     const game = new Game(uuidv4(), playerId);
     await redis.set(`game:${game.id}`, JSON.stringify(game));
+    return game.id;
 };
 
 const joinGame = async (playerId, gameId) => {
@@ -324,8 +325,9 @@ const processTask = async (task) => {
                 if (!task.playerId) {
                     throw new Error("Player ID is required");
                 }
-                await createGame(task.playerId);
+                const gameId = await createGame(task.playerId);
                 task.status = "completed";
+                task.gameId = gameId;
                 break;
             case "join":
                 console.log(`Handling ${task.action} task`);
@@ -405,6 +407,7 @@ const processTask = async (task) => {
                 break;
         }
         await redis.set(`task:${task.id}`, JSON.stringify(task));
+        await redis.publish("task:completed", JSON.stringify(task));
         console.log(`Task ${task.id} done.`);
     } catch (err) {
         console.error(`Error processing task ${task?.id}:`, err);
