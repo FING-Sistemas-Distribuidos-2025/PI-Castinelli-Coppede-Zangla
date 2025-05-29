@@ -1,8 +1,20 @@
 const Redis = require("ioredis");
-const redis = new Redis();
 const { v4: uuidv4 } = require("uuid");
 
-async function processQueue() {
+const redis = new Redis({
+    host: process.env.REDIS_HOST || "localhost",
+    port: process.env.REDIS_PORT || 6379,
+});
+
+redis.on("connect", () => {
+    console.log("Connected to Redis");
+});
+
+redis.on("error", (err) => {
+    console.error("Redis error:", err);
+});
+
+const processQueue = async () => {
     console.log("Game engine worker started, waiting for tasks...");
     while (true) {
         try {
@@ -20,7 +32,7 @@ async function processQueue() {
             console.error("Worker error:", err);
         }
     }
-}
+};
 
 const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
 const ranks = [
