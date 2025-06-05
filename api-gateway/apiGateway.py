@@ -28,13 +28,10 @@ class Task(BaseModel):
 
 @app.post("/game/")
 async def create_game(task: dict):
-    if not task["playerId"]:
-        raise HTTPException(status_code=400, detail="playerId es requerido")
     task_id = str(uuid.uuid4())
     task_data = {
         "id": task_id,
         "action": "create",
-        "playerId": task["playerId"]
     }
     await asyncio.to_thread(pubsub.subscribe, "task:completed")
     try:
