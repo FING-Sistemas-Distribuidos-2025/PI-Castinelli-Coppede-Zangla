@@ -171,3 +171,35 @@ def reset_game(game_id: str):
         raise HTTPException(status_code=503, detail="Redis no disponible") from e
 
     return {"status": "enqueued", "task_id": task_id}
+
+@app.get("/game/{game_id}/status")
+def get_game_status(game_id: str):
+    task_id = str(uuid.uuid4())
+    task_data = {
+        "id": task_id,
+        "action": "status",
+        "gameId": game_id
+    }
+    try:
+        r.lpush(QUEUE_NAME, json.dumps(task_data))
+    except redis.RedisError as e:
+        raise HTTPException(status_code=503, detail="Redis no disponible") from e
+
+    return {"status": "enqueued", "task_id": task_id}
+
+
+@app.get("/games")
+def get_all_games():
+    task_id = str(uuid.uuid4())
+    task_data = {
+        "id": task_id,
+        "action": "listGames"
+    }
+    try:
+        r.lpush(QUEUE_NAME, json.dumps(task_data))
+    except redis.RedisError as e:
+        raise HTTPException(status_code=503, detail="Redis no disponible") from e
+
+    return {"status": "enqueued", "task_id": task_id}
+
+
