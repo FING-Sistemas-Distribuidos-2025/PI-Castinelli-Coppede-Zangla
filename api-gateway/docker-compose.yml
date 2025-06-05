@@ -1,12 +1,21 @@
 services:
-  api-gateway:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - REDIS_HOST=redis
-    depends_on:
-      - redis
+    api-gateway:
+        build: .
+        ports:
+            - "8000:8000"
+        environment:
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        depends_on:
+            - redis
 
-  redis:
-    image: redis:7-alpine
+    game-engine:
+        build: ../game-engine
+        depends_on:
+            - redis
+        environment:
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+
+    redis:
+        image: redis:alpine

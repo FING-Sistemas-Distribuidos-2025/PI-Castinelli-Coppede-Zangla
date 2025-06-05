@@ -4,6 +4,7 @@ import redis
 import json
 import uuid
 import os
+import asyncio
 
 app = FastAPI()
 
@@ -12,7 +13,12 @@ REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 QUEUE_NAME = "queue:tasks"
 
+# For normal commands
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+
+# For PubSub
+pubsub_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+pubsub = pubsub_client.pubsub()
 
 # Modelo de datos para las tareas
 class Task(BaseModel):
@@ -20,23 +26,32 @@ class Task(BaseModel):
     playerId: str = None
     gameId: str = None
 
-@app.post("/game/create")
-def create_game(task: Task):
-    if not task.playerId:
+@app.post("/game/")
+async def create_game(task: dict):
+    if not task["playerId"]:
         raise HTTPException(status_code=400, detail="playerId es requerido")
     task_id = str(uuid.uuid4())
     task_data = {
         "id": task_id,
         "action": "create",
-        "playerId": task.playerId
+        "playerId": task["playerId"]
     }
+    await asyncio.to_thread(pubsub.subscribe, "task:completed")
     try:
         r.lpush(QUEUE_NAME, json.dumps(task_data))
-    except redis.RedisError as e:
-        raise HTTPException(status_code=503, detail="Redis no disponible") from e
-    
-    
-    return {"status": "enqueued", "task_id": task_id}
+        while True:
+            message = await asyncio.to_thread(pubsub.get_message, timeout=10)
+            if message and message['type'] == 'message':
+                data = json.loads(message['data'])
+                if data.get("id") == task_id:
+                    if data.get("status") == "success":
+                        return {"gameId": data.get("gameId")}
+                    else:
+                        raise HTTPException(status_code=500, detail=data.get("message", "Error en la tarea"))
+            await asyncio.sleep(0.1)
+    finally:
+        await asyncio.to_thread(pubsub.unsubscribe, "task:completed")
+        pubsub.close()
 
 @app.post("/game/{game_id}/join")
 def join_game(game_id: str, task: Task):

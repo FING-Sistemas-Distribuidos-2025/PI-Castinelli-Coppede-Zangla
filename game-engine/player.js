@@ -1,6 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
+
 export default class Player {
-    constructor(id) {
-        this.id = id;
+    constructor() {
+        this.id = uuidv4();
         this.hand = [];
         this.stand = false;
     }
