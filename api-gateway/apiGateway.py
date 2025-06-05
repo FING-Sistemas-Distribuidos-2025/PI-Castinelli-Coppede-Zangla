@@ -142,20 +142,6 @@ def leave(game_id: str, task: Task):
 
     return {"status": "enqueued", "task_id": task_id}
 
-@app.post("/game/{game_id}/dealerPlay")
-def dealer_play(game_id: str):
-    task_id = str(uuid.uuid4())
-    task_data = {
-        "id": task_id,
-        "action": "dealerPlay",
-        "gameId": game_id
-    }
-    try:
-        r.lpush(QUEUE_NAME, json.dumps(task_data))
-    except redis.RedisError as e:
-        raise HTTPException(status_code=503, detail="Redis no disponible") from e
-
-    return {"status": "enqueued", "task_id": task_id}
 
 @app.post("/game/{game_id}/reset")
 def reset_game(game_id: str):
