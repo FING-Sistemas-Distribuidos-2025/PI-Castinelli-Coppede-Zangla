@@ -11,7 +11,7 @@ describe("Game", () => {
 
     it("should initialize with correct properties", () => {
         expect(game.id).toBeDefined();
-        expect(game.status).toBe("waiting");
+        expect(game.inProgress).toBe(false);
         expect(game.players).toEqual([]);
         expect(game.playerCount).toBe(0);
     });
@@ -40,7 +40,9 @@ describe("Game", () => {
 
     it("should not start with less than 2 players", () => {
         game.addPlayer(uuidv4());
-        expect(() => game.start()).toThrow("at least 2 players");
+        expect(() => game.setPlayerReady(game.players[0].id)).not.toThrow();
+        // Should not start, so inProgress remains false
+        expect(game.inProgress).toBe(false);
     });
 
     it("should start game and deal cards", () => {
@@ -48,8 +50,9 @@ describe("Game", () => {
         const p2 = uuidv4();
         game.addPlayer(p1);
         game.addPlayer(p2);
-        game.start();
-        expect(game.status).toBe("in_progress");
+        game.setPlayerReady(p1);
+        game.setPlayerReady(p2);
+        expect(game.inProgress).toBe(true);
         expect(game.deck).toBeInstanceOf(Deck);
         expect(game.dealer).toBeInstanceOf(Player);
         expect(game.players[0].hand.length).toBe(2);
@@ -61,7 +64,8 @@ describe("Game", () => {
         const p2 = uuidv4();
         game.addPlayer(p1);
         game.addPlayer(p2);
-        game.start();
+        game.setPlayerReady(p1);
+        game.setPlayerReady(p2);
         expect(() => game.hit(p2)).toThrow("not the player's turn");
     });
 
@@ -70,21 +74,10 @@ describe("Game", () => {
         const p2 = uuidv4();
         game.addPlayer(p1);
         game.addPlayer(p2);
-        game.start();
+        game.setPlayerReady(p1);
+        game.setPlayerReady(p2);
         game.stand(p1);
         expect(game.players[0].stand).toBe(true);
-    });
-
-    it("should reset after finished", () => {
-        const p1 = uuidv4();
-        const p2 = uuidv4();
-        game.addPlayer(p1);
-        game.addPlayer(p2);
-        game.start();
-        game.status = "finished";
-        game.reset();
-        expect(game.status).toBe("waiting");
-        expect(game.deck).toBeUndefined();
     });
 
     it("should let dealer play after last player stands", () => {
@@ -92,11 +85,11 @@ describe("Game", () => {
         const p2 = uuidv4();
         game.addPlayer(p1);
         game.addPlayer(p2);
-        game.start();
-        // Both players stand in order
+        game.setPlayerReady(p1);
+        game.setPlayerReady(p2);
         game.stand(p1); // turn moves to p2
         game.stand(p2); // turn moves to dealer, dealer should play
-        expect(game.status).toBe("finished");
+        expect(game.inProgress).toBe(false);
         expect(game.dealer.score).toBeGreaterThanOrEqual(17);
     });
 });

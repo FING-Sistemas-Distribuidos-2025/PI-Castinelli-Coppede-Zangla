@@ -6,7 +6,7 @@ import {
     playerStand,
     playerHit,
     leaveGame,
-    resetGame
+    setPlayerReady
 } from "./usecases/gameActions.js";
 
 const QUEUE_KEY = "queue:tasks";
@@ -48,8 +48,8 @@ async function execute(task) {
             await joinGame(task.playerId, task.gameId);
             break;
         case "start":
-            validateFields(task, ["gameId"]);
-            await startGame(task.gameId);
+            validateFields(task, ["playerId", "gameId"]);
+            await playerReady(task.playerId, task.gameId);
             break;
         case "stand":
             validateFields(task, ["playerId", "gameId"]);
@@ -62,10 +62,6 @@ async function execute(task) {
         case "hit":
             validateFields(task, ["playerId", "gameId"]);
             await playerHit(task.playerId, task.gameId);
-            break;
-        case "reset":
-            validateFields(task, ["gameId"]);
-            await resetGame(task.gameId);
             break;
         default:
             throw new Error(`Acción desconocida: ${task.action}`);

@@ -24,13 +24,6 @@ export async function joinGame(playerId, gameId) {
     await saveGame(gameId, game);
 }
 
-export async function startGame(gameId) {
-    const game = await loadGame(gameId);
-    game.start();
-    await saveGame(gameId, game);
-    await redis.lrem("games:waiting", 0, gameId);
-}
-
 export async function playerStand(playerId, gameId) {
     const game = await loadGame(gameId);
     game.stand(playerId);
@@ -54,8 +47,8 @@ export async function leaveGame(playerId, gameId) {
     }
 }
 
-export async function resetGame(gameId) {
+export async function playerReady(playerId, gameId) {
     const game = await loadGame(gameId);
-    game.reset();
+    game.setPlayerReady(playerId);
     await saveGame(gameId, game);
 }

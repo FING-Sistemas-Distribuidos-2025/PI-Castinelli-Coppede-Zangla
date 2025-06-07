@@ -5,13 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 export default class Game {
     constructor() {
         this.id = uuidv4();
-        this.status = "waiting";
+        this.inProgress = false;
         this.players = [];
         this.createdAt = new Date().toISOString();
-    }
-
-    get playerCount() {
-        return this.players.length;
     }
 
     static fromObject(obj) {
@@ -26,47 +22,23 @@ export default class Game {
         return game;
     }
 
-    hasPlayer(playerId) {
-        return this.players.some((player) => player.id === playerId);
+    get playerCount() {
+        return this.players.length;
     }
 
-    addPlayer(playerId) {
-        if (this.status !== "waiting") {
-            throw new Error(`Game is not joinable`);
-        }
-        if (this.hasPlayer(playerId)) {
-            throw new Error(`Player already joined`);
-        }
-        if (this.playerCount > 7) {
-            throw new Error(`Game is full, cannot join`);
-        }
-        this.players.push(new Player(playerId));
-        this.updatedAt = new Date().toISOString();
+    get allPlayersReady() {
+        return this.players.length > 1 && this.players.every((p) => p.ready);
     }
 
-    removePlayer(playerId) {
-        const playerIndex = this.players.findIndex((p) => p.id === playerId);
-        if (playerIndex === -1) {
-            throw new Error(`Player is not part of the game`);
-        }
-        const player = this.players[playerIndex];
-        if (this.status === "in_progress") {
-            if (!player.busted) {
-                player.stand = true;
-                player.left = true;
-            }
-        } else {
-            this.players.splice(playerIndex, 1);
-        }
-        this.updatedAt = new Date().toISOString();
-    }
-
-    start() {
-        if (this.status === "in_progress") {
+    #start() {
+        if (this.inProgress) {
             throw new Error(`Game is already in progress`);
         }
         if (this.playerCount < 2) {
             throw new Error(`Game requires at least 2 players to start`);
+        }
+        if (!this.allPlayersReady) {
+            throw new Error(`Not all players are ready`);
         }
         this.deck = new Deck();
         this.deck.shuffle();
@@ -80,8 +52,75 @@ export default class Game {
             });
             this.dealer.addCard(this.deck.draw());
         }
-        this.status = "in_progress";
+        this.inProgress = true;
         this.turn = 0;
+        this.updatedAt = new Date().toISOString();
+    }
+
+    #dealerPlay() {
+        while (this.dealer.score < 17) {
+            this.dealer.addCard(this.deck.draw());
+        }
+        this.inProgress = false;
+    }
+
+    #nextTurn() {
+        if (this.turn === "dealer") {
+            throw new Error(`It's the dealer's turn, not a player`);
+        }
+        this.turn++;
+        if (this.turn >= this.players.length) {
+            this.turn = "dealer";
+            this.#dealerPlay();
+        }
+    }
+
+    hasPlayer(playerId) {
+        return this.players.some((player) => player.id === playerId);
+    }
+
+    addPlayer(playerId) {
+        if (this.inProgress) {
+            throw new Error(`Game is not joinable`);
+        }
+        if (this.hasPlayer(playerId)) {
+            throw new Error(`Player already joined`);
+        }
+        if (this.playerCount > 7) {
+            throw new Error(`Game is full, cannot join`);
+        }
+        this.players.push(new Player(playerId));
+        this.updatedAt = new Date().toISOString();
+    }
+
+    setPlayerReady(playerId) {
+        if (this.inProgress) {
+            throw new Error(`Game is already in progress`);
+        }
+        const player = this.players.find((p) => p.id === playerId);
+        if (!player) throw new Error(`Player is not part of the game`);
+        player.ready = true;
+        this.updatedAt = new Date().toISOString();
+        // Auto-start if all players are ready after setting ready
+        if (this.allPlayersReady) {
+            this.#start();
+        }
+    }
+
+    removePlayer(playerId) {
+        const playerIndex = this.players.findIndex((p) => p.id === playerId);
+        if (playerIndex === -1) {
+            throw new Error(`Player is not part of the game`);
+        }
+        const player = this.players[playerIndex];
+        if (this.inProgress) {
+            if (!player.busted) {
+                player.stand = true;
+                player.left = true;
+            }
+        } else {
+            this.players.splice(playerIndex, 1);
+        }
         this.updatedAt = new Date().toISOString();
     }
 
@@ -102,25 +141,7 @@ export default class Game {
         }
         player.addCard(this.deck.draw());
         if (player.busted) {
-            this.nextTurn();
-        }
-    }
-
-    dealerPlay() {
-        while (this.dealer.score < 17) {
-            this.dealer.addCard(this.deck.draw());
-        }
-        this.status = "finished";
-    }
-
-    nextTurn() {
-        if (this.turn === "dealer") {
-            throw new Error(`It's the dealer's turn, not a player`);
-        }
-        this.turn++;
-        if (this.turn >= this.players.length) {
-            this.turn = "dealer";
-            this.dealerPlay();
+            this.#nextTurn();
         }
     }
 
@@ -136,19 +157,6 @@ export default class Game {
             throw new Error(`Player has already busted`);
         }
         player.stand = true;
-        this.nextTurn();
-    }
-
-    reset() {
-        if (this.status !== "finished") {
-            throw new Error("Game can only be reset after it has finished");
-        } else {
-            this.status = "waiting";
-            this.players.forEach((player) => player.reset());
-            this.deck = undefined;
-            this.dealer = undefined;
-            this.turn = undefined;
-            this.updatedAt = new Date().toISOString();
-        }
+        this.#nextTurn();
     }
 }

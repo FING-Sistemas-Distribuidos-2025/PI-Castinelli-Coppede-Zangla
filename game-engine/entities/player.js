@@ -3,6 +3,7 @@ export default class Player {
         this.id = playerId;
         this.hand = [];
         this.stand = false;
+        this.ready = false; // Add ready property
     }
 
     get busted() {
@@ -36,5 +37,6 @@ export default class Player {
     reset() {
         this.hand = [];
         this.stand = false;
+        this.ready = false; // Reset ready status
     }
 }
