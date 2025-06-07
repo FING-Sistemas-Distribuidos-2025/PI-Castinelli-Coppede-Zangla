@@ -17,15 +17,12 @@ export default class Game {
     static fromObject(obj) {
         const game = Object.assign(new Game(), obj);
         game.players = obj.players.map((p) => Object.assign(new Player(), p));
-
         if (obj.deck) {
             game.deck = Object.assign(new Deck(), obj.deck);
         }
-
         if (obj.dealer) {
             game.dealer = Object.assign(new Player(obj.dealer.id), obj.dealer);
         }
-
         return game;
     }
 
@@ -111,7 +108,7 @@ export default class Game {
 
     dealerPlay() {
         while (this.dealer.score < 17) {
-            this.dealer.addCard(deck.draw());
+            this.dealer.addCard(this.deck.draw());
         }
         this.status = "finished";
     }
