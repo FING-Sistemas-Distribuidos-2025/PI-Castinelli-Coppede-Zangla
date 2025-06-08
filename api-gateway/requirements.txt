@@ -1,2 +1,3 @@
+setuptools
 fastapi[all]
-redis-py-cluster
+redis
