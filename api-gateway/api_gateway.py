@@ -16,8 +16,19 @@ WAITING_GAMES_KEY = "games:waiting"
 
 # Conexión principal a Redis (comandos normales)
 print(f"Conectando a Redis Cluster en {REDIS_HOST}:{REDIS_PORT}")
-startup_nodes = [{"host": REDIS_HOST, "port": int(REDIS_PORT)}]
-r = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
+startup_nodes = [
+    {"host": "redis-cluster-0.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+    {"host": "redis-cluster-1.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+    {"host": "redis-cluster-2.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+    {"host": "redis-cluster-3.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+    {"host": "redis-cluster-4.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+    {"host": "redis-cluster-5.redis-cluster-headless.default.svc.cluster.local", "port": 6379},
+]
+r = RedisCluster(
+    startup_nodes=startup_nodes,
+    decode_responses=True,
+    password=REDIS_PASSWORD
+)
 
 # Espera respuesta del pubsub
 @app.post("/games")
