@@ -1,9 +1,9 @@
-FROM python:alpine
+FROM python:3.13-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN apk add --no-cache python3-dev build-base && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY apiGateway.py .
 
