@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
-import redis
+from redis.cluster import RedisCluster
 import json
 import uuid
 import os
@@ -15,8 +15,9 @@ QUEUE_NAME = "queue:tasks"
 WAITING_GAMES_KEY = "games:waiting"
 
 # Conexión principal a Redis (comandos normales)
-print(f"Conectando a Redis en {REDIS_HOST}:{REDIS_PORT}")
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
+print(f"Conectando a Redis Cluster en {REDIS_HOST}:{REDIS_PORT}")
+startup_nodes = [{"host": REDIS_HOST, "port": int(REDIS_PORT)}]
+r = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
 
 # Espera respuesta del pubsub
 @app.post("/games")
@@ -28,7 +29,7 @@ async def create_game():
     }
     print(f"[POST /games] Encolando tarea de creación de juego: {task_id}")
 
-    pubsub_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
+    pubsub_client = RedisCluster(startup_nodes=startup_nodes, decode_responses=True)
     pubsub = pubsub_client.pubsub()
     channel_name = f"task:completed:{task_id}"
     print(f"[POST /games] Suscribiéndose a canal: {channel_name}")
