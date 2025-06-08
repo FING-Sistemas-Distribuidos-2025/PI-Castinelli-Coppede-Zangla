@@ -1,12 +1,12 @@
-FROM python:3.13-slim
+FROM python
 
 WORKDIR /app
 
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y python3-distutils && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY apiGateway.py .
+COPY api_gateway.py .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "apiGateway:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api_gateway:app", "--host", "0.0.0.0", "--port", "8000"]
