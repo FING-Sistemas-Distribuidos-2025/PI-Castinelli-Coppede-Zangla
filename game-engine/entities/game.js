@@ -1,4 +1,4 @@
-import Player from "./player.js";
+import {Player, Dealer} from "./player.js";
 import Deck from "./deck.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -42,7 +42,7 @@ export default class Game {
         }
         this.deck = new Deck();
         this.deck.shuffle();
-        this.dealer = new Player("dealer");
+        this.dealer = new Dealer();
         this.players.forEach((player) => {
             player.reset();
         });
@@ -62,6 +62,7 @@ export default class Game {
             this.dealer.addCard(this.deck.draw());
         }
         this.inProgress = false;
+        this.turn = undefined;
     }
 
     #nextTurn() {

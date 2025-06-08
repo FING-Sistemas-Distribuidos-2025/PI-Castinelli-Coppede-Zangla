@@ -2,11 +2,10 @@ import { redis } from "./infrastructure/redis.js";
 import {
     createGame,
     joinGame,
-    startGame,
     playerStand,
     playerHit,
     leaveGame,
-    setPlayerReady
+    playerReady
 } from "./usecases/gameActions.js";
 
 const QUEUE_KEY = "queue:tasks";
@@ -47,7 +46,7 @@ async function execute(task) {
             validateFields(task, ["playerId", "gameId"]);
             await joinGame(task.playerId, task.gameId);
             break;
-        case "start":
+        case "ready":
             validateFields(task, ["playerId", "gameId"]);
             await playerReady(task.playerId, task.gameId);
             break;

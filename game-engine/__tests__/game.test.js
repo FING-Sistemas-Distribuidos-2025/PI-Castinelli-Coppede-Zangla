@@ -1,5 +1,5 @@
 import Game from "../entities/game.js";
-import Player from "../entities/player.js";
+import { Player, Dealer } from "../entities/player.js";
 import Deck from "../entities/deck.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -54,7 +54,7 @@ describe("Game", () => {
         game.setPlayerReady(p2);
         expect(game.inProgress).toBe(true);
         expect(game.deck).toBeInstanceOf(Deck);
-        expect(game.dealer).toBeInstanceOf(Player);
+        expect(game.dealer).toBeInstanceOf(Dealer);
         expect(game.players[0].hand.length).toBe(2);
         expect(game.dealer.hand.length).toBe(2);
     });
