@@ -1,6 +1,6 @@
-export default class Player {
-    constructor(playerId) {
-        this.id = playerId;
+class BasePlayer {
+    constructor(id) {
+        this.id = id;
         this.hand = [];
         this.stand = false;
     }
@@ -37,4 +37,26 @@ export default class Player {
         this.hand = [];
         this.stand = false;
     }
+}
+
+export class Player extends BasePlayer {
+    constructor(playerId) {
+        if (playerId === "dealer") {
+            throw new Error("Cannot create a Player with 'dealer' ID");
+        }
+        super(playerId);
+        this.ready = false;
+    }
+
+    reset() {
+        super.reset();
+        this.ready = false;
+    }
+}
+
+export class Dealer extends BasePlayer {
+    constructor() {
+        super("dealer");
+    }
+    // No 'ready' property or logic needed
 }
