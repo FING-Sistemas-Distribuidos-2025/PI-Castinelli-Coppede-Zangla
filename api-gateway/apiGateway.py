@@ -28,7 +28,7 @@ async def create_game():
     }
     print(f"[POST /games] Encolando tarea de creación de juego: {task_id}")
 
-    pubsub_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+    pubsub_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
     pubsub = pubsub_client.pubsub()
     channel_name = f"task:completed:{task_id}"
     print(f"[POST /games] Suscribiéndose a canal: {channel_name}")
