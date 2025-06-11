@@ -1,5 +1,5 @@
 {
-  "name": "game-engine",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,6 +11,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "ioredis": "^5.6.1"
+    "ioredis": "^5.6.1",
+    "ws": "^8.18.2"
   }
 }

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: game-engine
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: game-engine
+    template:
+        metadata:
+            labels:
+                app: game-engine
+        spec:
+            containers:
+                - name: game-engine
+                  image: adrzanbar/game-engine:latest
+                  env:
+                      - name: REDIS_CLUSTER_NODES
+                        value: "my-release-redis-cluster-0.my-release-redis-cluster-headless:6379,my-release-redis-cluster-1.my-release-redis-cluster-headless:6379,my-release-redis-cluster-2.my-release-redis-cluster-headless:6379,my-release-redis-cluster-3.my-release-redis-cluster-headless:6379,my-release-redis-cluster-4.my-release-redis-cluster-headless:6379,my-release-redis-cluster-5.my-release-redis-cluster-headless:6379"
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: redis-secret
+                                key: REDIS_PASSWORD
