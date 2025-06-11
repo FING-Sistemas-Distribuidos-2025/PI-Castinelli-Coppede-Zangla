@@ -10,7 +10,7 @@ spec:
     - protocol: TCP
       port: 8000
       targetPort: 8000
-  type: ClusterIP
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,6 +28,11 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: rysenwinters/api-gateway:latest
+          image: rysenwinters/api-gateway:v0.9.1
           ports:
             - containerPort: 8000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster
+            - name: REDIS_PASSWORD
+              value: dXYpEKeUcY

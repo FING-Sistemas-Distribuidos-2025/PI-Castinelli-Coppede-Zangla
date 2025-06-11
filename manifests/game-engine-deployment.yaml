@@ -28,6 +28,6 @@ spec:
     spec:
       containers:
         - name: game-engine
-          image: rysenwinters/game-engine:latest
+          image: rysenwinters/game-engine:v0.2
           ports:
             - containerPort: 5001
