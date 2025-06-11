@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: server
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: server
+    template:
+        metadata:
+            labels:
+                app: server
+        spec:
+            containers:
+                - name: server
+                  image: adrzanbar/server:latest
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 8080
+                  env:
+                      - name: PORT
+                        value: "8080"
+                      - name: REDIS_CLUSTER_NODES
+                        value: "my-release-redis-cluster-0.my-release-redis-cluster-headless:6379,my-release-redis-cluster-1.my-release-redis-cluster-headless:6379,my-release-redis-cluster-2.my-release-redis-cluster-headless:6379,my-release-redis-cluster-3.my-release-redis-cluster-headless:6379,my-release-redis-cluster-4.my-release-redis-cluster-headless:6379,my-release-redis-cluster-5.my-release-redis-cluster-headless:6379"
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: redis-secret
+                                key: REDIS_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: server
+spec:
+    selector:
+        app: server
+    ports:
+        - protocol: TCP
+          port: 8080
+          targetPort: 8080
+    type: ClusterIP
