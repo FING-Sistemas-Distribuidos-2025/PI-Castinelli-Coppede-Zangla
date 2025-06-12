@@ -1,33 +1,25 @@
-# game-engine-deployment.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: game-engine-service
-spec:
-  selector:
-    app: game-engine
-  ports:
-    - protocol: TCP
-      port: 5001
-      targetPort: 5001
-  type: ClusterIP
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: game-engine
+    name: game-engine
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: game-engine
-  template:
-    metadata:
-      labels:
-        app: game-engine
-    spec:
-      containers:
-        - name: game-engine
-          image: rysenwinters/game-engine:latest
-          ports:
-            - containerPort: 5001
+    replicas: 1
+    selector:
+        matchLabels:
+            app: game-engine
+    template:
+        metadata:
+            labels:
+                app: game-engine
+        spec:
+            containers:
+                - name: game-engine
+                  image: adrzanbar/game-engine:latest
+                  env:
+                      - name: REDIS_CLUSTER_NODES
+                        value: "redis-cluster-0.redis-cluster-headless:6379,redis-cluster-1.redis-cluster-headless:6379,redis-cluster-2.redis-cluster-headless:6379,redis-cluster-3.redis-cluster-headless:6379,redis-cluster-4.redis-cluster-headless:6379,redis-cluster-5.redis-cluster-headless:6379"
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: redis-secret
+                                key: REDIS_PASSWORD

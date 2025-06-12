@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
         - name: client
-          image: rysenwinters/client-app:v1.2
+          image: rysenwinters/client-app:v1.4
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
