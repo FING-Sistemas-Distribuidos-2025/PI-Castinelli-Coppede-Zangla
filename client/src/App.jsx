@@ -11,7 +11,7 @@ function App() {
 
   // Connect to WebSocket and handle messages
   useEffect(() => {
-    const websocket = new WebSocket("ws://localhost:8080");
+    const websocket = new WebSocket("ws://server:8080");
     wsRef.current = websocket;
 
     websocket.onopen = () => {
