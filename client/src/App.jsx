@@ -8,10 +8,12 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState([]);
   const wsRef = useRef(null);
+  const serverIp = process.env.SERVER_HOST || "localhost"
 
   // Connect to WebSocket and handle messages
   useEffect(() => {
-    const websocket = new WebSocket("ws://10.66.100.172:8080");
+    const websocket = new WebSocket(`ws://10.66.100.172:8080`);
+    console.log(`${serverIp}`)
     wsRef.current = websocket;
 
     websocket.onopen = () => {

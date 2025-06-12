@@ -16,10 +16,13 @@ spec:
     spec:
       containers:
         - name: client
-          image: rysenwinters/client-app:v1.4
+          image: rysenwinters/client-app:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          env: 
+            - name: SERVER_HOST
+              value: "10.66.100.172"
           resources:
             requests:
               cpu: 100m
